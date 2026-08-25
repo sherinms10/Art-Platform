@@ -41,7 +41,10 @@ const initialFormData = {
 const RequestArtwork = () => {
   const [referenceImage, setReferenceImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const [searchParams] = useSearchParams();
 
@@ -65,7 +68,9 @@ const RequestArtwork = () => {
       [name]: value,
     }));
   };
-
+console.log("sampleId:", sampleId);
+console.log("selectedArtwork:", selectedArtwork);
+console.log("artworkId:", selectedArtwork?.id ?? null);
   const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
 
@@ -80,7 +85,6 @@ const RequestArtwork = () => {
       return;
     }
 
-    // Remove previous preview URL if one exists
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
     }
@@ -100,23 +104,87 @@ const RequestArtwork = () => {
     setPreviewUrl(null);
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleSubmit = async (
+  event: FormEvent<HTMLFormElement>,
+) => {
+  event.preventDefault();
 
-    console.log({
-      ...formData,
-      selectedArtwork,
-      referenceImage,
-    });
+  setIsSubmitting(true);
+  setErrorMessage("");
+
+  try {
+    const payload = new FormData();
+
+    // Customer information
+    payload.append("name", formData.name);
+    payload.append("email", formData.email);
+    payload.append("phone", formData.phone);
+
+    // Selected artwork
+    payload.append(
+      "artworkId",
+      selectedArtwork?.id
+        ? String(selectedArtwork.id)
+        : "",
+    );
+
+    // Artwork details
+    payload.append("style", formData.style);
+    payload.append("size", formData.size);
+    payload.append("quantity", formData.quantity);
+    payload.append("description", formData.description);
+
+    // Reference image
+    if (referenceImage) {
+      payload.append("referenceImage", referenceImage);
+    }
+
+    const response = await fetch(
+      "http://localhost:5000/api/artwork-requests",
+      {
+        method: "POST",
+        body: payload,
+      },
+    );
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(
+        data.message || "Unable to submit artwork request.",
+      );
+    }
+
+    console.log("Artwork request created:", data);
 
     setSubmitted(true);
-  };
 
-  const handleSubmitAnotherRequest = () => {
-    // Reset all form fields
+    // Reset form data
     setFormData(initialFormData);
 
-    // Remove uploaded image and preview
+    // Reset image
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+
+    setReferenceImage(null);
+    setPreviewUrl(null);
+  } catch (error) {
+    console.error("Artwork request error:", error);
+
+    setErrorMessage(
+      error instanceof Error
+        ? error.message
+        : "Something went wrong. Please try again.",
+    );
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
+  const handleSubmitAnotherRequest = () => {
+    setFormData(initialFormData);
+
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
     }
@@ -124,7 +192,7 @@ const RequestArtwork = () => {
     setReferenceImage(null);
     setPreviewUrl(null);
 
-    // Return to the form
+    setErrorMessage("");
     setSubmitted(false);
   };
 
@@ -132,29 +200,25 @@ const RequestArtwork = () => {
     return (
       <main className="flex min-h-screen items-center justify-center bg-[#f4f1eb] px-6">
         <div className="w-full max-w-lg text-center">
-          {/* Success icon */}
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#11100e] text-white">
             <Check size={28} strokeWidth={1.5} />
           </div>
 
-          {/* Label */}
           <p className="mt-8 text-xs uppercase tracking-[0.3em] text-neutral-400">
             Request Received
           </p>
 
-          {/* Heading */}
           <h1 className="mt-4 text-4xl font-light tracking-tight text-neutral-900 sm:text-5xl">
             Let's create something
             <span className="italic"> beautiful.</span>
           </h1>
 
-          {/* Description */}
           <p className="mx-auto mt-6 max-w-md text-sm leading-7 text-neutral-500">
-            Thank you for sharing your idea. Our artist will review your
-            request and get back to you with a personalized quotation.
+            Thank you for sharing your idea. Our artist will review
+            your request and get back to you with a personalized
+            quotation.
           </p>
 
-          {/* Submit another request */}
           <button
             type="button"
             onClick={handleSubmitAnotherRequest}
@@ -170,8 +234,8 @@ const RequestArtwork = () => {
   return (
     <main className="min-h-screen bg-[#f4f1eb] text-[#11100e]">
       {/* Header */}
-      <header className="border-b border-neutral-200 sticky top-0 bg-transparent z-10 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-7xl items-center px-6 py-6 lg:px-8 ">
+      <header className="sticky top-0 z-10 border-b border-neutral-200 bg-[#f4f1eb]/90 backdrop-blur-sm">
+        <div className="mx-auto flex max-w-7xl items-center px-6 py-6 lg:px-8">
           <a
             href="/"
             className="flex items-center gap-2 text-sm text-neutral-600 transition hover:text-black"
@@ -196,9 +260,9 @@ const RequestArtwork = () => {
           </h1>
 
           <p className="mt-6 max-w-xl text-sm leading-7 text-neutral-500 sm:text-base">
-            Share your reference, choose your preferred style, and tell us
-            what you'd like. We'll review everything and send you a
-            personalized quotation.
+            Share your reference, choose your preferred style, and
+            tell us what you'd like. We'll review everything and send
+            you a personalized quotation.
           </p>
         </div>
 
@@ -218,8 +282,8 @@ const RequestArtwork = () => {
                   </p>
 
                   <p className="mt-1 text-xs text-neutral-400">
-                    We'll use this artwork as the style reference for your
-                    request.
+                    We'll use this artwork as the style reference for
+                    your request.
                   </p>
                 </div>
 
@@ -296,7 +360,7 @@ const RequestArtwork = () => {
                   <button
                     type="button"
                     onClick={removeImage}
-                    className="absolute cursor-auto right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-black/80 text-white transition hover:bg-black"
+                    className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-black/80 text-white transition hover:bg-black"
                     aria-label="Remove reference image"
                   >
                     <X size={17} />
@@ -333,7 +397,7 @@ const RequestArtwork = () => {
                     value={formData.style}
                     onChange={handleChange}
                     required
-                    className="w-full rounded-xl border  bg-white px-4 py-3.5 text-sm outline-none transition focus:border-neutral-500"
+                    className="w-full rounded-xl border bg-white px-4 py-3.5 text-sm outline-none transition focus:border-neutral-500"
                   >
                     <option value="">Select style</option>
 
@@ -360,7 +424,7 @@ const RequestArtwork = () => {
                     value={formData.size}
                     onChange={handleChange}
                     required
-                    className="w-full rounded-xl border  bg-white px-4 py-3.5 text-sm outline-none transition focus:border-neutral-500"
+                    className="w-full rounded-xl border bg-white px-4 py-3.5 text-sm outline-none transition focus:border-neutral-500"
                   >
                     <option value="">Select size</option>
 
@@ -389,7 +453,7 @@ const RequestArtwork = () => {
                     max="10"
                     value={formData.quantity}
                     onChange={handleChange}
-                    className="w-full rounded-xl border  bg-white px-4 py-3.5 text-sm outline-none transition focus:border-neutral-500"
+                    className="w-full rounded-xl border bg-white px-4 py-3.5 text-sm outline-none transition focus:border-neutral-500"
                   />
                 </div>
               </div>
@@ -410,14 +474,14 @@ const RequestArtwork = () => {
                   onChange={handleChange}
                   rows={6}
                   placeholder="Tell us about your idea, background preferences, number of people, special details, etc."
-                  className="w-full resize-none rounded-xl border  bg-white px-4 py-4 text-sm outline-none placeholder:text-neutral-300 focus:border-neutral-500"
+                  className="w-full resize-none rounded-xl border bg-white px-4 py-4 text-sm outline-none placeholder:text-neutral-300 focus:border-neutral-500"
                 />
               </div>
             </section>
           </div>
 
           {/* RIGHT */}
-          <aside className="lg:sticky lg:top-10 lg:self-start">
+          <aside className="lg:sticky lg:top-28 lg:self-start">
             <div className="rounded-3xl bg-[#11100e] p-7 text-white sm:p-9">
               <p className="text-xs uppercase tracking-[0.25em] text-white/40">
                 Your Information
@@ -462,7 +526,7 @@ const RequestArtwork = () => {
                     onChange={handleChange}
                     required
                     placeholder="you@example.com"
-                    className="w-full border-b  bg-transparent px-0 py-3 text-sm outline-none placeholder:text-white/20 focus:border-white/50"
+                    className="w-full border-b bg-transparent px-0 py-3 text-sm outline-none placeholder:text-white/20 focus:border-white/50"
                   />
                 </div>
 
@@ -483,10 +547,19 @@ const RequestArtwork = () => {
                     onChange={handleChange}
                     required
                     placeholder="+91"
-                    className="w-full border-b  bg-transparent px-0 py-3 text-sm outline-none placeholder:text-white/20 focus:border-white/50"
+                    className="w-full border-b bg-transparent px-0 py-3 text-sm outline-none placeholder:text-white/20 focus:border-white/50"
                   />
                 </div>
               </div>
+
+              {/* Error */}
+              {errorMessage && (
+                <div className="mt-6 rounded-xl border border-red-400/20 bg-red-500/10 px-4 py-3">
+                  <p className="text-xs leading-5 text-red-300">
+                    {errorMessage}
+                  </p>
+                </div>
+              )}
 
               {/* Summary */}
               <div className="mt-10 border-t border-white/10 pt-7">
@@ -494,8 +567,8 @@ const RequestArtwork = () => {
                   <div className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-white" />
 
                   <p className="text-xs leading-5 text-white/40">
-                    No payment is required now. We'll review your request and
-                    contact you with the final quotation.
+                    No payment is required now. We'll review your
+                    request and contact you with the final quotation.
                   </p>
                 </div>
               </div>
@@ -503,9 +576,12 @@ const RequestArtwork = () => {
               {/* Submit */}
               <button
                 type="submit"
-                className="mt-8 w-full rounded-full bg-white px-6 py-4 text-sm font-medium text-black transition hover:bg-white/90"
+                disabled={isSubmitting}
+                className="mt-8 w-full rounded-full bg-white px-6 py-4 text-sm font-medium text-black transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Submit
+                {isSubmitting
+                  ? "Submitting Request..."
+                  : "Submit Artwork Request"}
               </button>
             </div>
           </aside>

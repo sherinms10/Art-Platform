@@ -68,9 +68,6 @@ const RequestArtwork = () => {
       [name]: value,
     }));
   };
-console.log("sampleId:", sampleId);
-console.log("selectedArtwork:", selectedArtwork);
-console.log("artworkId:", selectedArtwork?.id ?? null);
   const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
 
@@ -113,37 +110,29 @@ console.log("artworkId:", selectedArtwork?.id ?? null);
   setErrorMessage("");
 
   try {
-    const payload = new FormData();
+    const formDataToSend = new FormData();
 
-    // Customer information
-    payload.append("name", formData.name);
-    payload.append("email", formData.email);
-    payload.append("phone", formData.phone);
+formDataToSend.append("name", formData.name);
+formDataToSend.append("email", formData.email);
+formDataToSend.append("phone", formData.phone);
+formDataToSend.append(
+  "artworkId",
+  String(selectedArtwork?.id ?? ""),
+);
+formDataToSend.append("style", formData.style);
+formDataToSend.append("size", formData.size);
+formDataToSend.append("quantity", formData.quantity);
+formDataToSend.append("description", formData.description);
 
-    // Selected artwork
-    payload.append(
-      "artworkId",
-      selectedArtwork?.id
-        ? String(selectedArtwork.id)
-        : "",
-    );
-
-    // Artwork details
-    payload.append("style", formData.style);
-    payload.append("size", formData.size);
-    payload.append("quantity", formData.quantity);
-    payload.append("description", formData.description);
-
-    // Reference image
-    if (referenceImage) {
-      payload.append("referenceImage", referenceImage);
-    }
+if (referenceImage) {
+  formDataToSend.append("referenceImage", referenceImage);
+}
 
     const response = await fetch(
       "http://localhost:5000/api/artwork-requests",
       {
         method: "POST",
-        body: payload,
+        body: formDataToSend,
       },
     );
 
@@ -198,7 +187,7 @@ console.log("artworkId:", selectedArtwork?.id ?? null);
 
   if (submitted) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#f4f1eb] px-6">
+      <main className="request-page request-success flex min-h-screen items-center justify-center bg-[#f4f1eb] px-6">
         <div className="w-full max-w-lg text-center">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#11100e] text-white">
             <Check size={28} strokeWidth={1.5} />
@@ -232,31 +221,36 @@ console.log("artworkId:", selectedArtwork?.id ?? null);
   }
 
   return (
-    <main className="min-h-screen bg-[#f4f1eb] text-[#11100e]">
+    <main className="request-page min-h-screen bg-[#f4f1eb] text-[#11100e]">
       {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-neutral-200 bg-[#f4f1eb]/90 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-7xl items-center px-6 py-6 lg:px-8">
+      <header className="request-header sticky top-0 z-10 border-b border-neutral-200 bg-[#f4f1eb]/90 backdrop-blur-sm">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 lg:px-8">
           <a
             href="/"
-            className="flex items-center gap-2 text-sm text-neutral-600 transition hover:text-black"
+            className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-neutral-600 transition hover:text-black"
           >
             <ArrowLeft size={17} />
-            Back to Artworks
+            Exit brief
           </a>
+
+          <p className="hidden text-[10px] font-semibold uppercase tracking-[0.25em] text-neutral-400 sm:block">
+            Atelier No. 01 <span className="mx-2 text-[#ef5b45]">/</span> Commission
+          </p>
         </div>
       </header>
 
-      <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8 lg:py-24">
+      <div className="request-shell mx-auto max-w-7xl px-6 py-12 lg:px-8 lg:py-20">
         {/* Page heading */}
-        <div className="max-w-2xl">
-          <p className="text-xs font-medium uppercase tracking-[0.3em] text-neutral-400">
-            Custom Commission
+        <div className="request-intro max-w-3xl">
+          <p className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500">
+            <span className="h-2 w-2 rounded-full bg-[#ef5b45]" />
+            Custom commission / 2026
           </p>
 
-          <h1 className="mt-4 text-4xl font-light leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-            Tell us about the
+          <h1 className="request-heading mt-5 text-4xl font-light leading-tight tracking-tight sm:text-5xl lg:text-7xl">
+            Put your idea
             <br />
-            artwork you <span className="italic">imagine.</span>
+            <span>on the table.</span>
           </h1>
 
           <p className="mt-6 max-w-xl text-sm leading-7 text-neutral-500 sm:text-base">
@@ -269,10 +263,10 @@ console.log("artworkId:", selectedArtwork?.id ?? null);
         {/* Form */}
         <form
           onSubmit={handleSubmit}
-          className="mt-16 grid gap-12 lg:grid-cols-[1fr_0.8fr] lg:gap-24"
+          className="request-form mt-14 grid gap-12 lg:grid-cols-[1fr_0.82fr] lg:gap-20"
         >
           {/* LEFT */}
-          <div className="space-y-12">
+          <div className="request-main space-y-12">
             {/* Selected artwork */}
             {selectedArtwork && (
               <section>
@@ -287,7 +281,7 @@ console.log("artworkId:", selectedArtwork?.id ?? null);
                   </p>
                 </div>
 
-                <div className="flex gap-5 rounded-2xl bg-white p-4">
+                <div className="request-selected flex gap-5 border border-[#11100e] bg-white p-4">
                   <img
                     src={selectedArtwork.image}
                     alt={selectedArtwork.title}
@@ -313,8 +307,8 @@ console.log("artworkId:", selectedArtwork?.id ?? null);
 
             {/* Reference image */}
             <section>
-              <div className="mb-5">
-                <p className="text-sm font-medium">
+              <div className="request-section-heading mb-5">
+                <p className="text-sm font-semibold">
                   01. Reference Image
                 </p>
 
@@ -324,8 +318,8 @@ console.log("artworkId:", selectedArtwork?.id ?? null);
               </div>
 
               {!previewUrl ? (
-                <label className="flex min-h-72 cursor-pointer flex-col items-center justify-center rounded-3xl border border-dashed border-neutral-300 bg-white/40 px-6 text-center transition hover:border-neutral-500 hover:bg-white/70">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white">
+                <label className="request-upload flex min-h-72 cursor-pointer flex-col items-center justify-center border border-dashed border-neutral-400 bg-white/40 px-6 text-center transition hover:border-[#ef5b45] hover:bg-white/70">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#ef5b45] text-white">
                     <ImagePlus size={23} strokeWidth={1.4} />
                   </div>
 
@@ -354,7 +348,7 @@ console.log("artworkId:", selectedArtwork?.id ?? null);
                   <img
                     src={previewUrl}
                     alt="Reference preview"
-                    className="max-h-125 w-full object-contain"
+                    className="request-preview max-h-125 w-full object-contain"
                   />
 
                   <button
@@ -371,8 +365,8 @@ console.log("artworkId:", selectedArtwork?.id ?? null);
 
             {/* Artwork details */}
             <section>
-              <div className="mb-6">
-                <p className="text-sm font-medium">
+              <div className="request-section-heading mb-6">
+                <p className="text-sm font-semibold">
                   02. Artwork Details
                 </p>
 
@@ -397,7 +391,7 @@ console.log("artworkId:", selectedArtwork?.id ?? null);
                     value={formData.style}
                     onChange={handleChange}
                     required
-                    className="w-full rounded-xl border bg-white px-4 py-3.5 text-sm outline-none transition focus:border-neutral-500"
+                    className="request-field w-full border bg-white px-4 py-3.5 text-sm outline-none transition focus:border-[#ef5b45]"
                   >
                     <option value="">Select style</option>
 
@@ -424,7 +418,7 @@ console.log("artworkId:", selectedArtwork?.id ?? null);
                     value={formData.size}
                     onChange={handleChange}
                     required
-                    className="w-full rounded-xl border bg-white px-4 py-3.5 text-sm outline-none transition focus:border-neutral-500"
+                    className="request-field w-full border bg-white px-4 py-3.5 text-sm outline-none transition focus:border-[#ef5b45]"
                   >
                     <option value="">Select size</option>
 
@@ -453,7 +447,7 @@ console.log("artworkId:", selectedArtwork?.id ?? null);
                     max="10"
                     value={formData.quantity}
                     onChange={handleChange}
-                    className="w-full rounded-xl border bg-white px-4 py-3.5 text-sm outline-none transition focus:border-neutral-500"
+                    className="request-field w-full border bg-white px-4 py-3.5 text-sm outline-none transition focus:border-[#ef5b45]"
                   />
                 </div>
               </div>
@@ -474,7 +468,7 @@ console.log("artworkId:", selectedArtwork?.id ?? null);
                   onChange={handleChange}
                   rows={6}
                   placeholder="Tell us about your idea, background preferences, number of people, special details, etc."
-                  className="w-full resize-none rounded-xl border bg-white px-4 py-4 text-sm outline-none placeholder:text-neutral-300 focus:border-neutral-500"
+                  className="request-field w-full resize-none border bg-white px-4 py-4 text-sm outline-none placeholder:text-neutral-300 focus:border-[#ef5b45]"
                 />
               </div>
             </section>
@@ -482,9 +476,9 @@ console.log("artworkId:", selectedArtwork?.id ?? null);
 
           {/* RIGHT */}
           <aside className="lg:sticky lg:top-28 lg:self-start">
-            <div className="rounded-3xl bg-[#11100e] p-7 text-white sm:p-9">
+            <div className="request-brief rounded-none bg-[#11100e] p-7 text-white sm:p-9">
               <p className="text-xs uppercase tracking-[0.25em] text-white/40">
-                Your Information
+                03. Your details
               </p>
 
               <div className="mt-8 space-y-5">
@@ -577,7 +571,7 @@ console.log("artworkId:", selectedArtwork?.id ?? null);
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="mt-8 w-full rounded-full bg-white px-6 py-4 text-sm font-medium text-black transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60"
+                className="request-submit mt-8 w-full cursor-pointer bg-[#ef5b45] px-6 py-4 text-sm font-semibold text-white transition hover:bg-[#ff725b] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isSubmitting
                   ? "Submitting Request..."

@@ -320,7 +320,7 @@ const Contact = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="mt-7 flex w-full items-center justify-center gap-2 rounded-full bg-white px-6 py-4 text-sm font-medium text-black transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-50"
+              className="mt-7 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-white px-6 py-4 text-sm font-medium text-black transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Send size={16} />
 

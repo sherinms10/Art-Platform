@@ -2,7 +2,13 @@ import { Router } from "express";
 import multer from "multer";
 import path from "path";
 
-import { createArtworkRequest } from "../controllers/artworkRequestController.js";
+import {
+  createArtworkRequest,
+  getArtworkRequests,
+  updateArtworkRequestStatus,
+} from "../controllers/artworkRequestController.js";
+
+import { authMiddleware } from "../middleware/authMiddleware.js";
 
 const router = Router();
 
@@ -37,15 +43,44 @@ const upload = multer({
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error("Only JPG, PNG and WEBP images are allowed."));
+      cb(
+        new Error(
+          "Only JPG, PNG and WEBP images are allowed.",
+        ),
+      );
     }
   },
 });
+
+/*
+|--------------------------------------------------------------------------
+| PUBLIC
+|--------------------------------------------------------------------------
+| Customers can submit artwork requests without admin login.
+*/
 
 router.post(
   "/",
   upload.single("referenceImage"),
   createArtworkRequest,
+);
+
+/*
+|--------------------------------------------------------------------------
+| ADMIN ONLY
+|--------------------------------------------------------------------------
+*/
+
+router.get(
+  "/",
+  authMiddleware,
+  getArtworkRequests,
+);
+
+router.put(
+  "/:id/status",
+  authMiddleware,
+  updateArtworkRequestStatus,
 );
 
 export default router;

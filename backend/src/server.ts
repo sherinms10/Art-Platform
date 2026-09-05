@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import path from "path";
 import artworkRequestRoutes from "./routes/artworkRequestRoutes";
 import contactRoutes from "./routes/contactRoutes";
+import adminRoutes from "./routes/adminRoutes";
 
 dotenv.config();
 
@@ -23,7 +24,7 @@ app.use(express.json());
 
 app.use("/api/artwork-requests", artworkRequestRoutes);
 app.use("/api/contact", contactRoutes);
-
+app.use("/api/admin", adminRoutes);
 app.use(
   "/uploads",
   express.static(path.join(process.cwd(), "uploads")),

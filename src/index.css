@@ -9,6 +9,8 @@ body {
   min-width: 320px;
   background: #11100e;
   font-family: Inter, system-ui, sans-serif;
+  /* font-family: "Trebuchet MS", "Segoe UI", sans-serif; */
+
 }
 
 * {
@@ -126,3 +128,103 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 } */
+
+/* design */
+
+.admin-requests-page {
+  background-color: #f4f1eb;
+  background-image: radial-gradient(#11100e1a 0.7px, transparent 0.7px);
+  background-size: 13px 13px;
+}
+
+.requests-hero {
+  animation: admin-request-enter 650ms ease-out both;
+}
+
+.requests-title {
+  max-width: 720px;
+  /* font-family: Georgia, "Times New Roman", serif; */
+  /* font-size: clamp(3.4rem, 7vw, 6.5rem); */
+  line-height: 0.9;
+  letter-spacing: -0.07em;
+}
+
+.requests-pulse {
+  animation: admin-request-pulse 2s ease-in-out infinite;
+}
+
+.requests-ribbon {
+  animation: admin-request-enter 650ms 100ms ease-out both;
+}
+
+.request-key {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin: 0 5px 1px 0;
+  border-radius: 50%;
+}
+
+.request-key--new { background: #ef5b45; }
+.request-key--active { background: #11100e; }
+
+.request-card {
+  position: relative;
+  animation: admin-request-enter 650ms 180ms ease-out both;
+  box-shadow: 8px 8px 0 #11100e;
+}
+
+.request-card::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  width: 5px;
+  content: "";
+  background: #ef5b45;
+}
+
+.request-card__bar {
+  border-bottom: 1px solid #ffffff1a;
+}
+
+.request-index {
+  color: #ef5b45;
+}
+
+.request-status {
+  min-width: 132px;
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: calc(100% - 15px) 50%, calc(100% - 11px) 50%;
+  background-repeat: no-repeat;
+  background-size: 4px 4px, 4px 4px;
+  padding-right: 28px;
+}
+
+.request-visuals img {
+  filter: saturate(0.86) contrast(1.05);
+}
+
+.request-details {
+  background-image: linear-gradient(135deg, transparent 0 96%, #ef5b45 96% 100%);
+  background-size: 30px 30px;
+  background-repeat: no-repeat;
+  background-position: top right;
+}
+
+@keyframes admin-request-enter {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes admin-request-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 #ef5b4555; }
+  50% { box-shadow: 0 0 0 7px transparent; }
+}
+
+@media (max-width: 640px) {
+  .request-card { box-shadow: 4px 4px 0 #11100e; }
+  .requests-title { font-size: 3.45rem; }
+}

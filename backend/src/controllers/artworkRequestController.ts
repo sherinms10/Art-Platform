@@ -19,7 +19,7 @@ export const createArtworkRequest = async (
     } = req.body;
 
     // Uploaded reference image
-    const referenceImage = req.file
+    const referenceImageUrl = req.file
       ? `/uploads/artwork-requests/${req.file.filename}`
       : null;
 
@@ -71,30 +71,30 @@ export const createArtworkRequest = async (
     }
 
     // 3. Create artwork request
-    const [requestResult] = await db.execute(
-      `
-      INSERT INTO artwork_requests
-      (
-        customer_id,
-        artwork_id,
-        style,
-        size,
-        quantity,
-        description,
-        reference_image
-      )
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-      `,
-      [
-        customerId,
-        artworkId ? Number(artworkId) : null,
-        style,
-        size,
-        requestQuantity,
-        description || null,
-        referenceImage,
-      ],
-    );
+   const [requestResult] = await db.execute(
+  `
+  INSERT INTO artwork_requests
+  (
+    customer_id,
+    artwork_id,
+    style,
+    size,
+    quantity,
+    description,
+    reference_image_url
+  )
+  VALUES (?, ?, ?, ?, ?, ?, ?)
+  `,
+  [
+    customerId,
+    artworkId || null,
+    style,
+    size,
+    requestQuantity,
+    description || null,
+    referenceImageUrl,
+  ],
+);
 
     const result = requestResult as { insertId: number };
 
@@ -105,7 +105,7 @@ export const createArtworkRequest = async (
         requestId: result.insertId,
         customerId,
         artworkId: artworkId ? Number(artworkId) : null,
-        referenceImage,
+        referenceImageUrl,
       },
     });
   } catch (error) {
@@ -114,6 +114,117 @@ export const createArtworkRequest = async (
     return res.status(500).json({
       success: false,
       message: "Something went wrong while submitting the artwork request.",
+    });
+  }
+};
+
+export const getArtworkRequests = async (
+  req: Request,
+  res: Response,
+) => {
+  try {
+    const [rows] = await db.execute(`
+      SELECT
+        ar.id,
+        ar.customer_id,
+        ar.artwork_id,
+        ar.style,
+        ar.size,
+        ar.quantity,
+        ar.description,
+        ar.reference_image_url,
+        ar.status,
+        ar.created_at,
+        c.name,
+        c.email,
+        c.phone,
+        a.title AS artwork_title,
+        a.image_url AS artwork_image
+      FROM artwork_requests ar
+      LEFT JOIN customers c
+        ON ar.customer_id = c.id
+      LEFT JOIN artworks a
+        ON ar.artwork_id = a.id
+      ORDER BY ar.created_at DESC
+    `);
+
+    return res.status(200).json({
+      success: true,
+      data: rows,
+    });
+  } catch (error) {
+    console.error("Get artwork requests error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Unable to fetch artwork requests.",
+    });
+  }
+};
+
+export const updateArtworkRequestStatus = async (
+  req: Request,
+  res: Response,
+) => {
+  try {
+    const requestId = Number(req.params.id);
+    const { status } = req.body;
+
+    const allowedStatuses = [
+      "pending",
+      "reviewing",
+      "quoted",
+      "approved",
+      "completed",
+      "cancelled",
+    ];
+
+    if (!requestId || Number.isNaN(requestId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid artwork request ID.",
+      });
+    }
+
+    if (!status || !allowedStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid artwork request status.",
+      });
+    }
+
+    const [result] = await db.execute(
+      `
+      UPDATE artwork_requests
+      SET status = ?
+      WHERE id = ?
+      `,
+      [status, requestId],
+    );
+
+    const updateResult = result as { affectedRows: number };
+
+    if (updateResult.affectedRows === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Artwork request not found.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Artwork request status updated successfully.",
+      data: {
+        id: requestId,
+        status,
+      },
+    });
+  } catch (error) {
+    console.error("Update artwork request status error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong while updating the status.",
     });
   }
 };

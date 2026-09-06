@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../../config/api";
 
 const AdminLogin = () => {
   const navigate = useNavigate();
@@ -17,7 +18,7 @@ const AdminLogin = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/admin/login",
+        `${API_BASE_URL}/api/admin/login`,
         {
           method: "POST",
           headers: {

@@ -22,7 +22,7 @@ export const authMiddleware = (
       });
     }
 
-    const token = authHeader.split(" ")[1];
+    const token = authHeader.substring(7);
 
     if (!token) {
       return res.status(401).json({

@@ -10,6 +10,7 @@ import {
   Upload,
   X,
 } from "lucide-react";
+import { API_BASE_URL } from "../../config/api";
 
 const styles = [
   "Graphite / Pencil",
@@ -129,7 +130,7 @@ if (referenceImage) {
 }
 
     const response = await fetch(
-      "http://localhost:5000/api/artwork-requests",
+      `${API_BASE_URL}/api/artwork-requests`,
       {
         method: "POST",
         body: formDataToSend,

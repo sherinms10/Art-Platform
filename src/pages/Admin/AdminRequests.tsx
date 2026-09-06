@@ -9,6 +9,7 @@ import {
   X,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../../config/api";
 
 interface ArtworkRequest {
   id: number;
@@ -59,7 +60,7 @@ const AdminRequests = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/artwork-requests",
+        `${API_BASE_URL}/api/artwork-requests`,
         {
           method: "GET",
           headers: {
@@ -107,7 +108,7 @@ const AdminRequests = () => {
       return image;
     }
 
-    return `http://localhost:5000${image}`;
+    return `${API_BASE_URL}${image}`;
   };
 
   const updateStatus = async (
@@ -123,7 +124,7 @@ const AdminRequests = () => {
     }
 
     const response = await fetch(
-  `http://localhost:5000/api/artwork-requests/${requestId}/status`,
+  `${API_BASE_URL}/api/artwork-requests/${requestId}/status`,
   {
     method: "PUT",
     headers: {

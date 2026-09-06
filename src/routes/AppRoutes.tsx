@@ -14,7 +14,10 @@ const AppRoutes = () => {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public routes */}
+        {/* ============================= */}
+        {/* PUBLIC ROUTES */}
+        {/* ============================= */}
+
         <Route path="/" element={<Home />} />
 
         <Route
@@ -27,32 +30,28 @@ const AppRoutes = () => {
           element={<ArtworkDetails />}
         />
 
-        {/* Admin login */}
+        {/* ============================= */}
+        {/* ADMIN LOGIN */}
+        {/* ============================= */}
+
         <Route
           path="/admin/login"
           element={<AdminLogin />}
         />
 
-        {/* Admin panel */}
-        <Route path="/admin" element={<AdminLayout />}>
-        <Route
-  path="/admin/dashboard"
-  element={
-    <AdminProtectedRoute>
-      <AdminDashboard />
-    </AdminProtectedRoute>
-  }
-/>
+        {/* ============================= */}
+        {/* PROTECTED ADMIN PANEL */}
+        {/* ============================= */}
 
-<Route
-  path="/admin/requests"
-  element={
-    <AdminProtectedRoute>
-      <AdminRequests />
-    </AdminProtectedRoute>
-  }
-/>
-          {/* <Route
+        <Route
+          path="/admin"
+          element={
+            <AdminProtectedRoute>
+              <AdminLayout />
+            </AdminProtectedRoute>
+          }
+        >
+          <Route
             path="dashboard"
             element={<AdminDashboard />}
           />
@@ -60,7 +59,7 @@ const AppRoutes = () => {
           <Route
             path="requests"
             element={<AdminRequests />}
-          /> */}
+          />
         </Route>
       </Routes>
     </BrowserRouter>
